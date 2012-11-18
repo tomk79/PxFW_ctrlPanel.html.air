@@ -1,0 +1,21 @@
+@charset "UTF-8";
+
+body{
+	text-align:center;
+	padding:0px 0px 0px 0px;
+	margin:0px 0px 0px 0px;
+	background-color:#dddddd;
+	font-size:small;
+	font-family:"メイリオ", sans-serif;
+}
+
+.theme_outline{
+	text-align:left;
+	max-width:850px;
+	width:auto;
+	margin:20px auto;
+	background-color:#ffffff;
+	padding:20px;
+	border-radius:10px;
+}
+
