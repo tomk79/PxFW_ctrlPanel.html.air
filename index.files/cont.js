@@ -93,7 +93,21 @@ window.cont = new (function(){
 	function pageProjStartMenu(){
 		var canvas = $('#content');
 		var html = '';
+		var projInfo = main.projMgr.getProjInfo(currentProjId);
+		$.ajax({
+			url: projInfo.url ,
+			data: {
+				PX: 'api.dlfile.config'
+			} ,
+			success: function(data){
+				alert(data);
+			} ,
+			complete: function(){
+				alert('completed!');
+			}
+		});
 		html += '<p>プロジェクト '+currentProjId+' を選択しました。</p>';
+		html += '<p>URL: '+htmlspecialchars(projInfo.url)+'</p>';
 		html += '<p>開発中です。</p>';
 		html += '<p class="center">[<a href="./index.html" onclick="return main.deselectProj();">プロジェクトを選択しなおす</a>]</p>';
 		canvas.html(html);
