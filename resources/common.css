@@ -9,13 +9,52 @@ body{
 	font-family:"メイリオ", sans-serif;
 }
 
+.theme_header{
+	position:fixed;
+	top:0px; left:0px;
+	background-color:#666;
+	color:#ddd;
+	width:100%;
+	height:40px;
+	text-align:left;
+}
+.theme_header h1{
+	margin:0px;
+	padding:10px;
+	font-size:12px;
+	font-weight:bold;
+}
+
 .theme_outline{
 	text-align:left;
 	max-width:850px;
 	width:auto;
-	margin:20px auto;
+	margin:0px auto;
 	background-color:#ffffff;
-	padding:20px;
+	padding:70px 20px 20px 20px;
 	border-radius:10px;
+}
+
+
+/**
+ * [static] .clearfix
+ */
+.theme_outline{
+	display:block;
+	float:none;
+	clear:both;
+}
+.theme_outline:after{
+	content: " ";
+	display:block;
+	visibility:hidden;
+	height:0.1px;
+	font-size:0.1em;
+	line-height:0px;
+	clear:both;
+}
+.theme_outline{
+	/* clearfix(for IE6,7) (IE8以降不要) */
+	zoom:1;
 }
 

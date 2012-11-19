@@ -1,0 +1,29 @@
+@charset "UTF-8";
+
+/**
+ * コンテンツ内レイアウト要素
+ */
+.cont_layout_main{
+	float:left;
+	width:70%;
+}
+
+.cont_layout_sub{
+	float:right;
+	width:25%;
+	position:relative;
+}
+
+/**
+ * フォーム系要素
+ */
+.cont_form_addproj    ,
+.cont_form_updateproj {
+}
+.cont_form_addproj    input,
+.cont_form_updateproj input{
+	width:100%;
+}
+
+
+

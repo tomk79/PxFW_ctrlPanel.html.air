@@ -8,6 +8,7 @@ window.main = new (function(){
 
 	var _main = this;
 	var _this = this;
+	var currentProjId = '';
 
 	this.projMgr = {}; //プロジェクトマネージャ
 
@@ -21,104 +22,94 @@ window.main = new (function(){
 
 		//_this.projMgr.saveProjs();
 		_this.projMgr.loadProjs();
-		_this.refreshContent();
+
+		startContent();
 	});
 
-	/**
-	 * コンテンツ領域を更新する
-	 */
-	this.refreshContent = function(){
-		$('#content').html('<p>ページを生成しています...。</p>');
-		drawStartMenu();
+	function startContent(){
+		//コンテンツの処理を開始する
+		window.cont.play();
 	}
 
 	/**
-	 * スタートメニュー画面を描画する。
+	 * プロジェクトを選択する
 	 */
-	function drawStartMenu(){
-		var allProjs = _this.projMgr.getAllProjs();
-		var canvas = $('#content');
-		var html = '';
-		if( allProjs.length ){
-			var tmpHtml = '';
-			for( var i = 0; i<allProjs.length; i ++ ){
-				tmpHtml += '<tr>';
-				tmpHtml += '<th>'+htmlspecialchars(allProjs[i].id)+'</th>';
-				tmpHtml += '<th>'+htmlspecialchars(allProjs[i].url)+'</th>';
-				tmpHtml += '<td>'+htmlspecialchars(allProjs[i].authId)+'</td>';
-				tmpHtml += '<td>[<a href="javascript:;" onclick="alert(\'開発中\');">開く</a>]</td>';
-				tmpHtml += '<td>[<a href="javascript:alert(\'click href event.\'); ;" onclick="main.reviseProj('+htmlspecialchars(allProjs[i].id)+'); return false;">変更</a>]</td>';
-				tmpHtml += '<td>[<a href="javascript:alert(\'click href event.\'); ;" onclick="main.delProj('+htmlspecialchars(allProjs[i].id)+'); return false;">削除</a>]</td>';
-				tmpHtml += '</tr>';
-			}
-			html += '<table class="def">';
-			html += '<thead>';
-			html += '<tr>';
-			html += '<th>ID</th>';
-			html += '<th>URL</th>';
-			html += '<th>認証ID</th>';
-			html += '<th></th>';
-			html += '<th></th>';
-			html += '<th></th>';
-			html += '</tr>';
-			html += '</thead>';
-			html += '<tbody>';
-			html += ''+tmpHtml+'';
-			html += '</tbody>';
-			html += '</table>';
-		}else{
-			html += '<p>プロジェクトが定義されていません。</p>';
+	this.selectProj = function(projId){
+		if( !_this.projMgr.setSelectedProj(projId) ){
+			alert('プロジェクト '+projId+' は選択できませんでした。');
+			return false;
 		}
-		html += mkHtmlFormProjEditor();
-		canvas.html(html);
+		return true;
+	}
+
+	/**
+	 * プロジェクトの選択を解除する
+	 */
+	this.deselectProj = function(){
+		if( !_this.projMgr.setSelectedProj('') ){
+			alert('プロジェクトの選択解除に失敗しました。');
+			return false;
+		}
+		return true;
 	}
 
 	/**
 	 * プロジェクトを作成する
 	 */
 	this.addProj = function(formElm){
-		main.projMgr.addProj($('*[name=proj_url]',formElm)[0].value, $('*[name=proj_auth_id]',formElm)[0].value, $('*[name=proj_auth_pw]',formElm)[0].value);
-		main.projMgr.saveProjs();
-		main.refreshContent();
+		if( !_this.projMgr.addProj($('*[name=proj_url]',formElm)[0].value, $('*[name=proj_auth_id]',formElm)[0].value, $('*[name=proj_auth_pw]',formElm)[0].value) ){
+			return false;
+		}
+		_this.projMgr.saveProjs();
+		startContent();
+		return true;
+	}
+	/**
+	 * プロジェクトを更新する
+	 */
+	this.updateProj = function(formElm){
+		if( !_this.projMgr.updateProj($('*[name=proj_id]',formElm)[0].value, $('*[name=proj_url]',formElm)[0].value, $('*[name=proj_auth_id]',formElm)[0].value, $('*[name=proj_auth_pw]',formElm)[0].value) ){
+			return false;
+		}
+		_this.projMgr.saveProjs();
+		startContent();
 		return true;
 	}
 	/**
 	 * プロジェクト変更画面を表示する
 	 */
 	this.reviseProj = function(id){
-		var html = '';
-		html += '<p>変更'+htmlspecialchars(id)+'</p>';
-		html += mkHtmlFormProjEditor({def:id});
-		$.pxLBox.open(html);
+		var targetProjInfo = _this.projMgr.getProjInfo(id);
+		$('.contents .cont_form_addproj').hide();
+		$('.contents .cont_form_updateproj input[name=proj_id]')[0].value=(strlen(id)?id:'');
+		$('.contents .cont_form_updateproj input[name=proj_url]')[0].value=(strlen(targetProjInfo.url)?targetProjInfo.url:'');
+		$('.contents .cont_form_updateproj input[name=proj_auth_id]')[0].value=(strlen(targetProjInfo.authId)?targetProjInfo.authId:'');
+		$('.contents .cont_form_updateproj input[name=proj_auth_pw]')[0].value=(strlen(targetProjInfo.authPw)?targetProjInfo.authPw:'');
+		$('.contents .cont_form_updateproj').show();
 		return true;
+	}
+	/**
+	 * プロジェクト変更をキャンセルする
+	 */
+	this.cancelReviseProj = function(){
+		$('.contents .cont_form_updateproj input[name=proj_id]')[0].value='';
+		$('.contents .cont_form_updateproj input[name=proj_url]')[0].value='';
+		$('.contents .cont_form_updateproj input[name=proj_auth_id]')[0].value='';
+		$('.contents .cont_form_updateproj input[name=proj_auth_pw]')[0].value='';
+		$('.contents .cont_form_updateproj').hide();
+		$('.contents .cont_form_addproj').show();
 	}
 	/**
 	 * プロジェクトを削除する
 	 */
 	this.delProj = function(id){
 		if( !confirm('プロジェクト '+htmlspecialchars(id)+' を削除します。よろしいですか？') ){
-			return true;
+			return false;
 		}
 		_this.projMgr.delProj(id);
 		_this.projMgr.saveProjs();
-		_this.refreshContent();
+		startContent();
 		return true;
-	}
-
-	/**
-	 * プロジェクト編集フォームのHTMLソースを生成する。
-	 */
-	function mkHtmlFormProjEditor(opt){
-		var html = '';
-		html += '<form action="javascript:;" method="get" onsubmit="main.addProj(this); return false;">';
-		html += '<ul>';
-		html += '<li>URL: <input type="text" name="proj_url" value="" /></li>';
-		html += '<li>認証ID: <input type="text" name="proj_auth_id" value="" /></li>';
-		html += '<li>認証PW: <input type="password" name="proj_auth_pw" value="" /></li>';
-		html += '</ul>';
-		html += '<p><input type="submit" value="作成する" /></p>';
-		html += '</form>';
-		return html;
 	}
 
 	/*

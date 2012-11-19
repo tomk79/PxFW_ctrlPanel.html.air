@@ -43,17 +43,21 @@ window.main.projMgr = new (function(){
 	/**
 	 * プロジェクトを更新する
 	 */
-	this.updateProj = function(id,url,authId,authPw){
-		var projInfo = this.getProjInfo(id);
+	this.updateProj = function(projId,url,authId,authPw){
+		var projInfo = this.getProjInfo(projId);
 		if(!projInfo){ return false; }//存在しないIDなら
 
-		var tmpRow = {
-			id: id,
-			url: url,
-			authId: authId,
-			authPw: authPw
+		for( var i = 0; i < projDb.length; i ++ ){
+			if( projDb[i].id == projId ){
+				projDb[i] = {
+					id: projId,
+					url: url,
+					authId: authId,
+					authPw: authPw
+				};
+				break;
+			}
 		}
-		projDb.push(tmpRow);
 		return true;
 	}
 
@@ -84,7 +88,11 @@ window.main.projMgr = new (function(){
 		var csvSrc = '';
 		csvSrc += 'id,url,authId,authPw'+"\r\n";
 		for( var i = 0; i < projDb.length; i ++ ){
-			csvSrc += projDb[i].id+','+projDb[i].url+','+projDb[i].authId+','+projDb[i].authPw+''+"\r\n";
+			csvSrc += (strlen(projDb[i].id)?projDb[i].id:'')+',';
+			csvSrc += (strlen(projDb[i].url)?projDb[i].url:'')+',';
+			csvSrc += (strlen(projDb[i].authId)?projDb[i].authId:'')+',';
+			csvSrc += (strlen(projDb[i].authPw)?projDb[i].authPw:'')+'';
+			csvSrc += "\r\n";
 		}
 		fileSystem.writeUTFBytes(csvSrc);
 		fileSystem.close();
@@ -151,5 +159,45 @@ window.main.projMgr = new (function(){
 
 		return true;
 	}//loadProjs()
+
+	/**
+	 * プロジェクトを選択する
+	 */
+	this.setSelectedProj = function(projId){
+		if( !air ){
+			//デバッグ用モード
+			return true;
+		}
+		if( !strlen(projId) ){
+			projId = '';
+		}
+		var fileSystem = new air.FileStream();
+		fileSystem.open( air.File.applicationStorageDirectory.resolvePath( 'selected_proj.txt' ) , air.FileMode.WRITE);
+		fileSystem.writeUTFBytes(projId);
+		fileSystem.close();
+
+		return true;
+	}//setSelectedProj()
+
+	/**
+	 * 選択したプロジェクトIDを読み込む
+	 */
+	this.getSelectedProj = function(){
+		if(!air){
+			//デバッグ用モード
+			return "0";
+		}
+
+		var fileSystem = new air.FileStream();
+		var fileProjs = air.File.applicationStorageDirectory.resolvePath( 'selected_proj.txt' );
+		if( !fileProjs.exists ){
+			this.setSelectedProj('');
+		}
+		fileSystem.open( fileProjs , air.FileMode.READ );
+		var loadedValue = fileSystem.readUTFBytes(fileProjs.size);	// UTF文字列として読み込む
+		fileSystem.close();
+		return loadedValue;
+
+	}//getSelectedProj()
 
 })();
