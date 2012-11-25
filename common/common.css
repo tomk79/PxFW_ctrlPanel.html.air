@@ -1,0 +1,93 @@
+@charset "UTF-8";
+
+body{
+	text-align:center;
+	padding:0px 0px 0px 0px;
+	margin:0px 0px 0px 0px;
+	background-color:#dddddd;
+	font-size:small;
+	font-family:"メイリオ", sans-serif;
+}
+
+.theme_header{
+	position:fixed;
+	top:0px; left:0px;
+	background-color:#666;
+	color:#ddd;
+	width:100%;
+	height:40px;
+	text-align:left;
+}
+.theme_header .theme_window_title{
+	margin:0px;
+	padding:10px;
+	font-size:12px;
+	font-weight:bold;
+}
+
+.theme_outline{
+	text-align:left;
+	max-width:850px;
+	width:auto;
+	margin:0px auto;
+	background-color:#ffffff;
+	padding:70px 20px 20px 20px;
+	border-radius:10px;
+}
+
+.theme_outline h1{
+	font-weight:bold;
+	margin:1em 0;
+	padding:0px;
+	font-size:18px;
+	color:#000;
+}
+
+/**
+ * モジュールセレクタ
+ */
+.theme_outline .theme_mod_selector{
+}
+.theme_outline .theme_mod_selector ul{
+	margin:0; padding:0;
+	text-align:left;
+}
+.theme_outline .theme_mod_selector ul li{
+	margin:1px 2px; padding:0px;
+	list-style-type:none;
+	display:inline-block;
+}
+.theme_outline .theme_mod_selector ul li a{
+	display:block;
+	padding:2px 12px;
+	border:1px solid #666699;
+	background-color:#eeeef5;
+}
+.theme_outline .theme_mod_selector ul li a.current{
+	border:1px solid #3333ff;
+	background-color:#666699;
+	color:#ffffff;
+}
+
+/**
+ * [static] .clearfix
+ */
+.theme_outline{
+	display:block;
+	float:none;
+	clear:both;
+}
+.theme_outline:after{
+	content: " ";
+	display:block;
+	visibility:hidden;
+	height:0.1px;
+	font-size:0.1em;
+	line-height:0px;
+	clear:both;
+}
+.theme_outline{
+	/* clearfix(for IE6,7) (IE8以降不要) */
+	zoom:1;
+}
+

@@ -188,7 +188,15 @@ window.cont = new (function(){
 		if( selectedProjConf.length ){
 			$src += '<div class="unit">'+"\n";
 			$src += '<h2>その他の値</h2>'+"\n";
-//			$src += $this->mk_ary_table(selectedProjConf);
+			$src += '<table class="def" style="width:100%;">'+"\n";
+			$src += '<colgroup><col width="60%" /><col width="40%" /></colgroup>'+"\n";
+			for( var key in selectedProjConf ){
+				$src += '<tr>'+"\n";
+				$src += '<th>'+htmlspecialchars(key)+'</th>'+"\n";
+				$src += '<td>'+htmlspecialchars(selectedProjConf[key])+'</td>'+"\n";
+				$src += '</tr>'+"\n";
+			}
+			$src += '</table>'+"\n";
 			$src += '</div><!-- /.unit -->'+"\n";
 		}
 
