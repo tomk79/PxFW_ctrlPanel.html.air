@@ -234,4 +234,20 @@ window.main = new (function(){
 		return false;
 	}
 
+	/**
+	 * 外部のHTMLをインクルードする。
+	 */
+	window.include = function(path){
+		var fileSystem = new air.FileStream();
+		var fileProjs = air.File.applicationDirectory.resolvePath( path );
+		if( !fileProjs.exists ){
+			return false;
+		}
+		fileSystem.open( fileProjs , air.FileMode.READ );
+		var content = fileSystem.readUTFBytes(fileProjs.size);	// UTF文字列として読み込む
+		fileSystem.close();
+		document.write(content);
+		return true;
+	}
+
 })();//main()
