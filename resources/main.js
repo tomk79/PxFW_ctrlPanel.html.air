@@ -6,11 +6,27 @@ window.main = new (function(){
 
 	dojo.require("dojox.data.CsvStore");
 
+	var htmlFileName = window.location.href;//←メモ
 	var _main = this;
 	var _this = this;
-	var currentProjId = '';
 
 	this.projMgr = {}; //プロジェクトマネージャ
+
+	/**
+	 * HTMLアプリケーションをリロードする
+	 */
+	this.reload = function(){
+		window.location.href = htmlFileName;
+		return true;
+	}
+
+	/**
+	 * ホーム画面へ遷移する
+	 */
+	this.back2home = function(){
+		window.location.href = 'app:/index.html';
+		return true;
+	}
 
 	/**
 	 * 実行
@@ -23,7 +39,28 @@ window.main = new (function(){
 		//_this.projMgr.saveProjs();
 		_this.projMgr.loadProjs();
 
+		var currentProjId = _this.projMgr.getSelectedProjId();
+		if( strlen(currentProjId) ){
+			_this.projMgr.loadSelectedProjConf(currentProjId,startContent);
+
+			$('.theme_header')
+				.append($('<a href="index.html">')
+				.css({
+					position:'absolute',top:'10px',right:'10px',color:'#ffffff'
+				})
+				.html('[プロジェクトを再選択]')
+				.each(function(){
+					$(this).click(function(){
+						main.deselectProj();
+						main.back2home();
+					});
+				})
+			);
+			return;
+		}
+
 		startContent();
+		return;
 	});
 
 	function startContent(){
@@ -35,10 +72,11 @@ window.main = new (function(){
 	 * プロジェクトを選択する
 	 */
 	this.selectProj = function(projId){
-		if( !_this.projMgr.setSelectedProj(projId) ){
+		if( !_this.projMgr.selectProj(projId) ){
 			alert('プロジェクト '+projId+' は選択できませんでした。');
 			return false;
 		}
+		this.reload();
 		return true;
 	}
 
@@ -46,10 +84,11 @@ window.main = new (function(){
 	 * プロジェクトの選択を解除する
 	 */
 	this.deselectProj = function(){
-		if( !_this.projMgr.setSelectedProj('') ){
+		if( !_this.projMgr.selectProj('') ){
 			alert('プロジェクトの選択解除に失敗しました。');
 			return false;
 		}
+		this.reload();
 		return true;
 	}
 
@@ -61,7 +100,7 @@ window.main = new (function(){
 			return false;
 		}
 		_this.projMgr.saveProjs();
-		startContent();
+		this.reload();
 		return true;
 	}
 	/**
@@ -72,32 +111,8 @@ window.main = new (function(){
 			return false;
 		}
 		_this.projMgr.saveProjs();
-		startContent();
+		this.reload();
 		return true;
-	}
-	/**
-	 * プロジェクト変更画面を表示する
-	 */
-	this.reviseProj = function(id){
-		var targetProjInfo = _this.projMgr.getProjInfo(id);
-		$('.contents .cont_form_addproj').hide();
-		$('.contents .cont_form_updateproj input[name=proj_id]')[0].value=(strlen(id)?id:'');
-		$('.contents .cont_form_updateproj input[name=proj_url]')[0].value=(strlen(targetProjInfo.url)?targetProjInfo.url:'');
-		$('.contents .cont_form_updateproj input[name=proj_auth_id]')[0].value=(strlen(targetProjInfo.authId)?targetProjInfo.authId:'');
-		$('.contents .cont_form_updateproj input[name=proj_auth_pw]')[0].value=(strlen(targetProjInfo.authPw)?targetProjInfo.authPw:'');
-		$('.contents .cont_form_updateproj').show();
-		return true;
-	}
-	/**
-	 * プロジェクト変更をキャンセルする
-	 */
-	this.cancelReviseProj = function(){
-		$('.contents .cont_form_updateproj input[name=proj_id]')[0].value='';
-		$('.contents .cont_form_updateproj input[name=proj_url]')[0].value='';
-		$('.contents .cont_form_updateproj input[name=proj_auth_id]')[0].value='';
-		$('.contents .cont_form_updateproj input[name=proj_auth_pw]')[0].value='';
-		$('.contents .cont_form_updateproj').hide();
-		$('.contents .cont_form_addproj').show();
 	}
 	/**
 	 * プロジェクトを削除する
@@ -108,7 +123,7 @@ window.main = new (function(){
 		}
 		_this.projMgr.delProj(id);
 		_this.projMgr.saveProjs();
-		startContent();
+		this.reload();
 		return true;
 	}
 
@@ -135,10 +150,8 @@ window.main = new (function(){
 	}
 
 	/**
-	 * 文字列の幅を調べる
+	 * HTMLの特殊文字を変換する
 	 */
-	//--------------------------------------
-	//	HTMLの特殊文字を変換する
 	window.htmlspecialchars = function( $string ){
 		if( $string === undefined ){ return ''; }
 		if( $string === null ){ return ''; }
@@ -174,10 +187,8 @@ window.main = new (function(){
 	}
 
 	/**
-	 * 文字列の幅を調べる
+	 * 整数型かどうか調べる
 	 */
-	//--------------------------------------
-	//	整数型かどうか調べる
 	window.is_int = function( val ){
 		var type = typeof( val );
 		if( type.toLowerCase() != 'number' ){ return false; }
@@ -204,6 +215,23 @@ window.main = new (function(){
 		var type = typeof( val );
 		if( type.toLowerCase() != 'object' ){ return false; }
 		return true;
+	}
+
+	/**
+	 * nullかどうか調べる
+	 */
+	window.is_null = function( val ){
+		if( val === undefined ){ return true; }//undefinedはtrue評価
+		if( val === null ){ return true; }
+		return false;
+	}
+
+	/**
+	 * undefinedかどうか調べる
+	 */
+	window.is_undefined = function( val ){
+		if( val === undefined ){ return true; }
+		return false;
 	}
 
 })();//main()

@@ -3,14 +3,16 @@
  * @author Tomoya Koyanagi (@tomk79)
  */
 window.cont = new (function(){
+	var selectedProjId = '';
+	var selectedProjConf = {};
 
 	/**
 	 * コンテンツ領域を更新する
 	 */
 	this.play = function(){
 		$('#content').html('<p>ページを生成しています...。</p>');
-		currentProjId = main.projMgr.getSelectedProj();
-		if( !strlen(currentProjId) ){
+		selectedProjId = main.projMgr.getSelectedProjId();
+		if( !strlen(selectedProjId) ){
 			pageProjSelectMenu();
 			return;
 		}
@@ -33,9 +35,9 @@ window.cont = new (function(){
 				tmpHtml += '<th>'+htmlspecialchars(allProjs[i].id)+'</th>';
 				tmpHtml += '<th>'+htmlspecialchars(allProjs[i].url)+'</th>';
 				tmpHtml += '<td>'+htmlspecialchars(allProjs[i].authId)+'</td>';
-				tmpHtml += '<td class="center">[<a href="./index.html" onclick="return main.selectProj('+htmlspecialchars(allProjs[i].id)+');">開く</a>]</td>';
-				tmpHtml += '<td class="center">[<a href="./index.html" onclick="return !main.reviseProj('+htmlspecialchars(allProjs[i].id)+');">変更</a>]</td>';
-				tmpHtml += '<td class="center">[<a href="./index.html" onclick="return main.delProj('+htmlspecialchars(allProjs[i].id)+');">削除</a>]</td>';
+				tmpHtml += '<td class="center">[<a href="javascript:;" onclick="main.selectProj('+htmlspecialchars(allProjs[i].id)+');">開く</a>]</td>';
+				tmpHtml += '<td class="center">[<a href="javascript:;" onclick="cont.reviseProj('+htmlspecialchars(allProjs[i].id)+');">変更</a>]</td>';
+				tmpHtml += '<td class="center">[<a href="javascript:;" onclick="main.delProj('+htmlspecialchars(allProjs[i].id)+');">削除</a>]</td>';
 				tmpHtml += '</tr>';
 			}
 			html += '<table class="def" style="width:100%;">';
@@ -60,7 +62,7 @@ window.cont = new (function(){
 		html += '</div>';
 		html += '<div class="cont_layout_sub">';
 		html += '<div class="cont_form_addproj">';
-		html += '<form action="./index.html" method="get" onsubmit="return main.addProj(this);">';
+		html += '<form action="javascript:;" method="get" onsubmit="main.addProj(this);">';
 		html += '<dl>';
 		html += '<dt>URL:</dt><dd><input type="text" name="proj_url" value="" /></dd>';
 		html += '<dt>認証ID:</dt><dd><input type="text" name="proj_auth_id" value="" /></dd>';
@@ -71,7 +73,7 @@ window.cont = new (function(){
 		html += '</form>';
 		html += '</div>';
 		html += '<div class="cont_form_updateproj">';
-		html += '<form action="./index.html" method="get" onsubmit="return main.updateProj(this);">';
+		html += '<form action="javascript:;" method="get" onsubmit="main.updateProj(this);">';
 		html += '<dl>';
 		html += '<dt>URL:</dt><dd><input type="text" name="proj_url" value="" /></dd>';
 		html += '<dt>認証ID:</dt><dd><input type="text" name="proj_auth_id" value="" /></dd>';
@@ -80,7 +82,7 @@ window.cont = new (function(){
 		html += '<p><input type="submit" value="更新する" /></p>';
 		html += '<div><input type="hidden" name="proj_id" value="" /></div>';
 		html += '</form>';
-		html += '<p><input type="button" value="キャンセル" onclick="main.cancelReviseProj();return false;" /></p>';
+		html += '<p><input type="button" value="キャンセル" onclick="cont.cancelReviseProj();return false;" /></p>';
 		html += '</div>';
 		html += '</div>';
 		canvas.html(html);
@@ -88,30 +90,142 @@ window.cont = new (function(){
 	}
 
 	/**
+	 * プロジェクト変更画面を表示する
+	 */
+	this.reviseProj = function(id){
+		var targetProjInfo = main.projMgr.getProjInfo(id);
+		$('.contents .cont_form_addproj').hide();
+		$('.contents .cont_form_updateproj input[name=proj_id]')[0].value=(strlen(id)?id:'');
+		$('.contents .cont_form_updateproj input[name=proj_url]')[0].value=(strlen(targetProjInfo.url)?targetProjInfo.url:'');
+		$('.contents .cont_form_updateproj input[name=proj_auth_id]')[0].value=(strlen(targetProjInfo.authId)?targetProjInfo.authId:'');
+		$('.contents .cont_form_updateproj input[name=proj_auth_pw]')[0].value=(strlen(targetProjInfo.authPw)?targetProjInfo.authPw:'');
+		$('.contents .cont_form_updateproj').show();
+		return true;
+	}
+	/**
+	 * プロジェクト変更をキャンセルする
+	 */
+	this.cancelReviseProj = function(){
+		$('.contents .cont_form_updateproj input[name=proj_id]')[0].value='';
+		$('.contents .cont_form_updateproj input[name=proj_url]')[0].value='';
+		$('.contents .cont_form_updateproj input[name=proj_auth_id]')[0].value='';
+		$('.contents .cont_form_updateproj input[name=proj_auth_pw]')[0].value='';
+		$('.contents .cont_form_updateproj').hide();
+		$('.contents .cont_form_addproj').show();
+	}
+
+	/**
 	 * プロジェクトスタートメニューページを描画する。
 	 */
 	function pageProjStartMenu(){
 		var canvas = $('#content');
+		var projInfo = main.projMgr.getProjInfo(selectedProjId);
+		selectedProjConf = main.projMgr.getSelectedProjConf();
+
 		var html = '';
-		var projInfo = main.projMgr.getProjInfo(currentProjId);
-		$.ajax({
-			url: projInfo.url ,
-			data: {
-				PX: 'api.dlfile.config'
-			} ,
-			success: function(data){
-				alert(data);
-			} ,
-			complete: function(){
-				alert('completed!');
-			}
-		});
-		html += '<p>プロジェクト '+currentProjId+' を選択しました。</p>';
-		html += '<p>URL: '+htmlspecialchars(projInfo.url)+'</p>';
-		html += '<p>開発中です。</p>';
-		html += '<p class="center">[<a href="./index.html" onclick="return main.deselectProj();">プロジェクトを選択しなおす</a>]</p>';
+		html += mk_config_list();
 		canvas.html(html);
 	}
 
+	/**
+	 * コンフィグの一覧画面を生成する。
+	 */
+	function mk_config_list(){
+		var $src = '';
+
+		$src += '<div class="unit">'+"\n";
+
+		$src += '<h2>project</h2>'+"\n";
+		$src += '<table class="def" style="width:100%;">'+"\n";
+		$src += '<colgroup><col width="30%" /><col width="30%" /><col width="40%" /></colgroup>'+"\n";
+		$src += mk_config_unit('project.id','プロジェクトID');
+		$src += mk_config_unit('project.name','プロジェクト名');
+		$src += mk_config_unit('project.auth_type','認証形式');
+		$src += mk_config_unit('project.auth_name','認証ユーザーID');
+		$src += mk_config_unit('project.auth_password','認証パスワード');
+		$src += '</table>'+"\n";
+
+		$src += '<h2>paths</h2>'+"\n";
+		$src += '<table class="def" style="width:100%;">'+"\n";
+		$src += '<colgroup><col width="30%" /><col width="30%" /><col width="40%" /></colgroup>'+"\n";
+		$src += mk_config_unit('paths.px_dir','Pickles Framework のディレクトリパス','realpath',true);
+		$src += mk_config_unit('paths.access_log','アクセスログ出力先ファイルパス','realpath');
+		$src += mk_config_unit('paths.error_log','エラーログ出力先ファイルパス','realpath');
+		$src += '</table>'+"\n";
+
+		$src += '<h2>publish</h2>'+"\n";
+		$src += '<table class="def" style="width:100%;">'+"\n";
+		$src += '<colgroup><col width="30%" /><col width="30%" /><col width="40%" /></colgroup>'+"\n";
+		$src += mk_config_unit('publish.path_publish_dir','パブリッシュ先ディレクトリパス','realpath');
+		$src += mk_config_unit('publish.paths_ignore','パブリッシュ対象外パスの一覧');
+		$src += '</table>'+"\n";
+
+		$src += '<h2>dbms</h2>'+"\n";
+		$src += '<table class="def" style="width:100%;">'+"\n";
+		$src += '<colgroup><col width="30%" /><col width="30%" /><col width="40%" /></colgroup>'+"\n";
+		$src += mk_config_unit('dbms.prefix','テーブル名の接頭辞');
+		$src += mk_config_unit('dbms.dbms','DBMS名');
+		$src += mk_config_unit('dbms.host','接続先ホスト名');
+		$src += mk_config_unit('dbms.port','接続先ポート番号');
+		$src += mk_config_unit('dbms.database_name','データベース名(SQLiteの場合は、データベースのパス)');
+		$src += mk_config_unit('dbms.user','ユーザー名');
+		$src += mk_config_unit('dbms.password','パスワード');
+		$src += mk_config_unit('dbms.charset','文字セット');
+		$src += '</table>'+"\n";
+
+		$src += '<h2>system</h2>'+"\n";
+		$src += '<table class="def" style="width:100%;">'+"\n";
+		$src += '<colgroup><col width="30%" /><col width="30%" /><col width="40%" /></colgroup>'+"\n";
+		$src += mk_config_unit('system.allow_pxcommands','PX Commands の実行を許可するフラグ(1=許可, 0=不許可)','bool');
+		$src += mk_config_unit('system.session_name','セッションID');
+		$src += mk_config_unit('system.filesystem_encoding','ファイル名の文字エンコード');
+		$src += mk_config_unit('system.output_encoding','出力エンコード');
+		$src += mk_config_unit('system.output_eof_coding',' 出力改行コード("CR"|"LF"|"CRLF")');
+		$src += '</table>'+"\n";
+
+		$src += '</div><!-- /.unit -->'+"\n";
+
+		if( selectedProjConf.length ){
+			$src += '<div class="unit">'+"\n";
+			$src += '<h2>その他の値</h2>'+"\n";
+//			$src += $this->mk_ary_table(selectedProjConf);
+			$src += '</div><!-- /.unit -->'+"\n";
+		}
+
+		return $src;
+	}
+
+	/**
+	 * コンフィグ項目1件の出力
+	 */
+	function mk_config_unit($key,$label,$type,$must){
+		$src = '';
+		$src += '	<tr>'+"\n";
+		$src += '		<th>'+htmlspecialchars( $key )+'</th>'+"\n";
+		$src += '		<th>'+htmlspecialchars( $label )+'</th>'+"\n";
+		$src += '		<td>';
+		if(is_null(selectedProjConf[$key])){
+			$src += '<span style="font-style:italic; color:#aaaaaa; background-color:#ffffff;">null</span>';
+		}else{
+			switch($type){
+				case 'bool':
+					$src += (selectedProjConf[$key]?'<span style="font-style:italic; color:#0033dd; background-color:#ffffff;">true</span>':'<span style="font-style:italic; color:#0033dd; background-color:#ffffff;">false</span>');
+					break;
+				case 'realpath':
+					$src += htmlspecialchars( selectedProjConf[$key] );
+					break;
+				case 'string':
+				default:
+					$src += htmlspecialchars( selectedProjConf[$key] );
+					break;
+			}
+		}
+		$src += '</td>'+"\n";
+		$src += '	</tr>'+"\n";
+
+		delete(selectedProjConf[$key]);
+
+		return $src;
+	}//mk_config_unit()
 
 })();

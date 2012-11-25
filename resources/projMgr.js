@@ -6,6 +6,8 @@ window.main.projMgr = new (function(){
 	var projDb = [];
 	var _main = window.main;
 	var maxIdNum = 0;
+	var selectedProjId = '';
+	var selectedProjConf = {};
 
 	/**
 	 * 全プロジェクトの情報を取得
@@ -163,7 +165,7 @@ window.main.projMgr = new (function(){
 	/**
 	 * プロジェクトを選択する
 	 */
-	this.setSelectedProj = function(projId){
+	this.selectProj = function(projId){
 		if( !air ){
 			//デバッグ用モード
 			return true;
@@ -176,13 +178,14 @@ window.main.projMgr = new (function(){
 		fileSystem.writeUTFBytes(projId);
 		fileSystem.close();
 
+		selectedProjId = projId;
 		return true;
-	}//setSelectedProj()
+	}//selectProj()
 
 	/**
 	 * 選択したプロジェクトIDを読み込む
 	 */
-	this.getSelectedProj = function(){
+	this.getSelectedProjId = function(){
 		if(!air){
 			//デバッグ用モード
 			return "0";
@@ -191,13 +194,55 @@ window.main.projMgr = new (function(){
 		var fileSystem = new air.FileStream();
 		var fileProjs = air.File.applicationStorageDirectory.resolvePath( 'selected_proj.txt' );
 		if( !fileProjs.exists ){
-			this.setSelectedProj('');
+			this.selectProj('');
 		}
 		fileSystem.open( fileProjs , air.FileMode.READ );
 		var loadedValue = fileSystem.readUTFBytes(fileProjs.size);	// UTF文字列として読み込む
 		fileSystem.close();
+
+		selectedProjId = loadedValue;
 		return loadedValue;
 
-	}//getSelectedProj()
+	}//getSelectedProjId()
+
+	/**
+	 * プロジェクトのコンフィグ情報を取得する
+	 */
+	this.getSelectedProjConf = function(){
+		return selectedProjConf;
+	}
+
+	/**
+	 * プロジェクトのコンフィグ情報を読み込む
+	 */
+	this.loadSelectedProjConf = function(projId,callback){
+		var projInfo = this.getProjInfo(projId);
+		selectedProjConf = {};
+		$.ajax({
+			url: projInfo.url ,
+			dataType: 'xml' ,
+			data: {
+				PX: 'api.get.config' ,
+				type: 'xml'
+			} ,
+			success: function(data){
+				var elms = $(data);
+				selectedProjConf = {};
+				$('api>object>element',elms).each(function(){
+					selectedProjConf[$(this).attr('name')] = $('value',this).text();
+					return true;
+				});
+
+			} ,
+			error: function(XMLHttpRequest, textStatus, errorThrown){
+				alert('コンフィグ情報の読み込みエラーが発生しました。');
+			} ,
+			complete: function(){
+				if(callback){
+					(callback)();
+				}
+			}
+		});
+	}
 
 })();
