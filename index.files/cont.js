@@ -185,11 +185,16 @@ window.cont = new (function(){
 
 		$src += '</div><!-- /.unit -->'+"\n";
 
-		if( selectedProjConf.length ){
+		var count = 0;
+		for( var key in selectedProjConf ){
+			//JSでは連想配列の要素数はこうやって数えるのだそうだ。
+			count++;
+		}
+		if( count ){
 			$src += '<div class="unit">'+"\n";
 			$src += '<h2>その他の値</h2>'+"\n";
 			$src += '<table class="def" style="width:100%;">'+"\n";
-			$src += '<colgroup><col width="60%" /><col width="40%" /></colgroup>'+"\n";
+			$src += '<colgroup><col width="40%" /><col width="60%" /></colgroup>'+"\n";
 			for( var key in selectedProjConf ){
 				$src += '<tr>'+"\n";
 				$src += '<th>'+htmlspecialchars(key)+'</th>'+"\n";

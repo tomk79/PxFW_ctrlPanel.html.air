@@ -49,8 +49,10 @@ body{
 .theme_outline .theme_mod_selector{
 }
 .theme_outline .theme_mod_selector ul{
-	margin:0; padding:0;
+	margin:6px 0; padding:3px 0;
 	text-align:left;
+	border-top:1px solid #dddddd;
+	border-bottom:1px solid #dddddd;
 }
 .theme_outline .theme_mod_selector ul li{
 	margin:1px 2px; padding:0px;
