@@ -11,6 +11,7 @@ document.write( (function(){
 	RTN += '<script type="text/javascript" src="app:/lib/jquery/jquery-1.4.2.js"></script>' + "\n";
 	RTN += '<script type="text/javascript" src="app:/lib/px/jquery.pxLBox.js"></script>' + "\n";
 	RTN += '<script type="text/javascript" src="app:/lib/dojo/dojo.js"></script>' + "\n";
+	RTN += '<script type="text/javascript" src="app:/common/nativeMenu.js"></script>' + "\n";
 	RTN += '<script type="text/javascript" src="app:/common/main.js"></script>' + "\n";
 	RTN += '<script type="text/javascript" src="app:/common/projMgr.js"></script>' + "\n";
 	RTN += '<script type="text/javascript" src="app:/common/modMgr.js"></script>' + "\n";

@@ -121,6 +121,10 @@ window.cont = new (function(){
 		var canvas = $('#content');
 		var projInfo = main.projMgr.getProjInfo(selectedProjId);
 		selectedProjConf = main.projMgr.getSelectedProjConf();
+		if(!selectedProjConf){
+			canvas.html('[ERROR] Connection FAILED. (maybe...)');
+			return;
+		}
 
 		var html = '';
 		html += mk_config_list();
