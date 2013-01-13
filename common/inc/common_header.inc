@@ -3,6 +3,5 @@
 </div><!-- /.theme_header -->
 
 <div class="theme_outline">
-	<div class="theme_mod_selector"></div>
 	<h1></h1>
 	<div class="contents" id="content">

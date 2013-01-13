@@ -39,6 +39,8 @@ window.main = new (function(){
 		//_this.projMgr.saveProjs();
 		_this.projMgr.loadProjs();
 
+		setupAirNativeMenu();//AIR Native Menu を登録。
+
 		var currentProjId = _this.projMgr.getSelectedProjId();
 		if( strlen(currentProjId) ){
 			//プロジェクトが選択された状態だったら実行する処理
@@ -154,6 +156,89 @@ window.main = new (function(){
 		_this.projMgr.delProj(id);
 		_this.projMgr.saveProjs();
 		this.reload();
+		return true;
+	}
+
+	/**
+	 * AIR Native Menu を登録する。
+	 */
+	function setupAirNativeMenu(){
+		var menuList = [
+			{
+				label:"&Project",
+				submenu: [
+					// {
+					// 	label: "New" ,
+					// 	submenu: [
+					// 		{
+					// 			label: "Quit" ,
+					// 			exec: function(event){ alert('Quit'); }
+					// 		},
+					// 		{
+					// 			label: "Quit" ,
+					// 			exec: function(event){ alert('Quit'); }
+					// 		},
+					// 		{
+					// 			label: "Quit" ,
+					// 			exec: function(event){ alert('Quit'); }
+					// 		}
+					// 	]
+					// },
+					{
+						label: "プロジェクトを再選択 (&R)" ,
+						exec: function(event){
+							window.main.deselectProj();
+							window.main.back2home();
+						}
+					},
+					{
+						label: "このアプリケーションを終了する (&Q)" ,
+						exec: function(event){
+							air.NativeApplication.nativeApplication.exit();
+						}
+					}
+				]
+			} ,
+			{
+				label:"&Edit",
+				submenu: (function(){
+					var modList = window.main.modMgr.getModList();
+					var rtn = [];
+					var selectedProjId = main.projMgr.getSelectedProjId();
+					if(!strlen(selectedProjId)){
+						rtn.push({
+							label: "プロジェクトを選択" ,
+							exec: function(event){
+								window.location.href = 'app:/index.html';
+							}
+						});
+						return rtn;
+					}
+					for(var row in modList){
+						var menuUnit = {};
+						menuUnit.label = modList[row].label;
+						menuUnit.exec = (function(path){return function(event){ window.location.href = path; }})(modList[row].path);
+						rtn.push(menuUnit);
+					}
+					return rtn;
+				})()
+			} ,
+			{
+				label:"&Help",
+				submenu: [
+					{
+						label: "&About Pickles Framework" ,
+						exec: function(event){ air.navigateToURL(new air.URLRequest('https://github.com/tomk79/PxFW-1.x')); }
+					} ,
+					{
+						label: "&Get Pickles Framework" ,
+						exec: function(event){ air.navigateToURL(new air.URLRequest('https://github.com/tomk79/PxFW-1.x/tags')); }
+					}
+				]
+			}
+		];
+
+		airNativeMenu(menuList);
 		return true;
 	}
 
