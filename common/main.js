@@ -238,7 +238,7 @@ window.main = new (function(){
 			}
 		];
 
-		airNativeMenu(menuList);
+//		airNativeMenu(menuList);
 		return true;
 	}
 
@@ -353,6 +353,7 @@ window.main = new (function(){
 	 * 外部のHTMLをインクルードする。
 	 */
 	window.include = function(path){
+		//  [UTODO]Macで上手く動いてない。		
 		var fileSystem = new air.FileStream();
 		var fileProjs = air.File.applicationDirectory.resolvePath( path );
 		if( !fileProjs.exists ){
@@ -360,6 +361,7 @@ window.main = new (function(){
 		}
 		fileSystem.open( fileProjs , air.FileMode.READ );
 		var content = fileSystem.readUTFBytes(fileProjs.size);	// UTF文字列として読み込む
+
 		fileSystem.close();
 		document.write(content);
 		return true;

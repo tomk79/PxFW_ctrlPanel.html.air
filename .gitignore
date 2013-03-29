@@ -1,4 +1,4 @@
-PxFWCtrlPanel.air
 .tmp_*
 .settings/*
 jaxer_bin/*
+.DS_Store
